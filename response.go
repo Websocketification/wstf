@@ -10,6 +10,10 @@ import (
 type Response struct {
 	// The websocket connection.
 	Connection *websocket.Conn
+	// Locals scoped among the connection.
+	ConnectionLocals map[string]interface{}
+	// The original http request.
+	HttpRequest *http.Request
 	// JSON Response that will be sent as response to corresponding request.
 	JsonResponse JsonResponse
 	// A map that contains response local variables scoped to the request.
@@ -36,9 +40,11 @@ func (m JsonResponse) ToJson() string {
 	return string(str)
 }
 
-func NewResponse(conn *websocket.Conn, requestID string) Response {
+func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestID string) Response {
 	res := Response{}
 	res.Connection = conn
+	res.ConnectionLocals = connectionLocals
+	res.HttpRequest = request
 	res.JsonResponse = JsonResponse{ID: requestID}
 	res.Locals = map[string]interface{}{}
 	return res

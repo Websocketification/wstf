@@ -10,12 +10,13 @@ import (
 type Connection struct {
 }
 
-func NewConnection(app Application, conn *websocket.Conn, r *http.Request) Connection {
+func NewConnection(app Application, conn *websocket.Conn, request *http.Request) Connection {
 	connection := Connection{}
-	res := NewResponse(conn, "")
+	connectionLocals := map[string]interface{}{}
+	res := NewResponse(conn, connectionLocals, request, "")
 	req := Request{}
-	app.OnConnectionRouter.Handle(r.URL.Path, req, res, func() {
-		fmt.Println("A device is connected:", r.URL.Path)
+	app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
+		fmt.Println("A device is connected:", request.URL.Path)
 	})
 	for {
 		mt, message, err := conn.ReadMessage()
@@ -28,14 +29,14 @@ func NewConnection(app Application, conn *websocket.Conn, r *http.Request) Conne
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
 		}
-		res := NewResponse(conn, req.ID)
+		res := NewResponse(conn, connectionLocals, request, req.ID)
 		app.RootRouter.Handle(req.Path, *req, res, func() {
 			fmt.Println("Unhandled request!")
 			res.Error(404, "Unhandled request!")
 		})
 	}
-	app.OnDisconnectionRouter.Handle(r.URL.Path, req, res, func() {
-		fmt.Println("A device is connected:", r.URL.Path)
+	app.OnDisconnectionRouter.Handle(request.URL.Path, req, res, func() {
+		fmt.Println("A device is connected:", request.URL.Path)
 	})
 	conn.Close()
 	return connection
