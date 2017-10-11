@@ -34,7 +34,7 @@ func (m Application) GetWebsocketHandlerFunc() func(w http.ResponseWriter, r *ht
 			log.Print("Upgrade Error:", err)
 			return
 		}
-		NewConnection(m, c)
+		NewConnection(m, c, r)
 	}
 	return mHandler
 }
