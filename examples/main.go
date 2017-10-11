@@ -38,7 +38,7 @@ func main() {
 	mRouter.Push("/users", mSubRouter)
 
 	// Test
-	mRouter.Handle("/users/befisher", wstf.Request{Method:"GET"}, wstf.Response{}, func() {
+	mRouter.Handle("/users/befisher", wstf.Request{Method: "GET", Params: map[string]string{}}, wstf.Response{}, func() {
 		fmt.Println("Request Ended without handling!")
 	})
 }

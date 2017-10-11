@@ -12,6 +12,8 @@ type Request struct {
 	Method string `json:"method"`
 	// Non-empty path.
 	Path string `json:"path"`
+	// Params matched from path.
+	Params map[string]string
 	// The query part of request which is a JSON object and usually typed as map[string]string.
 	Query interface{} `json:"query"`
 	// Headers of the request.
@@ -23,6 +25,7 @@ type Request struct {
 func NewRequest(jsonBytes []byte) (*Request, error) {
 	var req *Request
 	err := json.Unmarshal(jsonBytes, &req)
+	req.Params = map[string]string{}
 	if !req.IsRequestValid() {
 		return nil, errors.New("expected fields is empty")
 	}
