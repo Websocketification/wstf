@@ -4,14 +4,19 @@ import (
 	"log"
 	"github.com/gorilla/websocket"
 	"fmt"
+	"net/http"
 )
 
 type Connection struct {
 }
 
-func NewConnection(app Application, conn *websocket.Conn) Connection {
-	defer conn.Close()
+func NewConnection(app Application, conn *websocket.Conn, r *http.Request) Connection {
 	connection := Connection{}
+	res := NewResponse(conn, "")
+	req := Request{}
+	app.OnConnectionRouter.Handle(r.URL.Path, req, res, func() {
+		fmt.Println("A device is connected:", r.URL.Path)
+	})
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
@@ -29,5 +34,9 @@ func NewConnection(app Application, conn *websocket.Conn) Connection {
 			res.Error(404, "Unhandled request!")
 		})
 	}
+	app.OnDisconnectionRouter.Handle(r.URL.Path, req, res, func() {
+		fmt.Println("A device is connected:", r.URL.Path)
+	})
+	conn.Close()
 	return connection
 }
