@@ -12,7 +12,12 @@ var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
 }} // use default options
 
 type Application struct {
+	// Main router.
 	RootRouter Router
+	// Router that will be handled on device is connected.
+	OnConnectionRouter Router
+	// Router that will be handled on device is disconnected.
+	OnDisconnectionRouter Router
 }
 
 // Create a new Application.
@@ -38,4 +43,12 @@ func (m Application) GetWebsocketHandlerFunc() func(w http.ResponseWriter, r *ht
 // An application can have only one router as the home router.
 func (m *Application) SetRootRouter(router Router) {
 	m.RootRouter = router
+}
+
+func (m *Application) OnConnected(router Router) {
+	m.OnConnectionRouter = router
+}
+
+func (m *Application) OnDisconnected(router Router) {
+	m.OnDisconnectionRouter = router
 }
