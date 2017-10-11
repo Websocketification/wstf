@@ -8,8 +8,13 @@ import (
 )
 
 type Response struct {
-	Connection   *websocket.Conn
+	// The websocket connection.
+	Connection *websocket.Conn
+	// JSON Response that will be sent as response to corresponding request.
 	JsonResponse JsonResponse
+	// A map that contains response local variables scoped to the request.
+	// This property is useful for exposing request-level information such as the request path name, authenticated user, user settings, and so on.
+	Locals map[string]interface{}
 }
 
 type JsonResponse struct {
@@ -31,10 +36,11 @@ func (m JsonResponse) ToJson() string {
 	return string(str)
 }
 
-func NewResponse(conn *websocket.Conn, ID string) Response {
+func NewResponse(conn *websocket.Conn, requestID string) Response {
 	res := Response{}
 	res.Connection = conn
-	res.JsonResponse = JsonResponse{ID: ID}
+	res.JsonResponse = JsonResponse{ID: requestID}
+	res.Locals = map[string]interface{}{}
 	return res
 }
 

@@ -6,17 +6,26 @@ import (
 )
 
 type Request struct {
-	ID      string              `json:"id"`
-	Method  string              `json:"method"`
-	Path    string              `json:"path"`
-	Query   string              `json:"query"`
+	// The request unique ID.
+	ID string `json:"id"`
+	// HTTP Method.
+	Method string `json:"method"`
+	// Non-empty path.
+	Path string `json:"path"`
+	// Params matched from path.
+	Params map[string]string
+	// The query part of request which is a JSON object and usually typed as map[string]string.
+	Query interface{} `json:"query"`
+	// Headers of the request.
 	Headers map[string](string) `json:"headers"`
-	Body    string              `json:"body"`
+	// The request body of request, a JSON object.
+	Body interface{} `json:"body"`
 }
 
 func NewRequest(jsonBytes []byte) (*Request, error) {
 	var req *Request
 	err := json.Unmarshal(jsonBytes, &req)
+	req.Params = map[string]string{}
 	if !req.IsRequestValid() {
 		return nil, errors.New("expected fields is empty")
 	}
