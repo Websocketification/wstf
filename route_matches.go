@@ -2,7 +2,6 @@ package wstf
 
 import (
 	"fmt"
-	"github.com/lovecust/backend/utils/JsonUtil"
 )
 
 // If the given path matches this route,
@@ -18,7 +17,7 @@ func (m Route) Match(remainingPath string, request Request, response Response) b
 		for i := 0; i < len(m.ParamNames); i++ {
 			request.Params[m.ParamNames[i]] = matches[0][i+1]
 		}
-		fmt.Println(JsonUtil.Stringify(request))
+		fmt.Println(Stringify(request))
 	}
 	return true
 	matches2 := matches[0][1:]
