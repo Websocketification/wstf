@@ -35,6 +35,9 @@ func NewRoute(pattern string, router *Router) Route {
 		Router:     router,
 	}
 
+	// Pre-process the pattern.
+	pattern = strings.Replace(pattern, "*", `[^/]*`, -1)
+
 	// Find all the parameters.
 	parameters := patternRegexp.FindAllStringSubmatch(pattern, -1)
 	for _, parameter := range parameters {
