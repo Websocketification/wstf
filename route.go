@@ -55,7 +55,14 @@ func NewRoute(pattern string, router *Router) Route {
 			return "(" + foos[1][0:len(foos[1])-1] + ")"
 		}
 	})
+
 	fmt.Println("newPattern: ", newPattern, m.ParamNames)
+	// Panic for abnormal patterns.
+	_, err := regexp.Compile(newPattern)
+	if err != nil {
+		panic("pattern [" + newPattern + "] is not recognized as normal.")
+	}
+
 	m.Regexp = regexp.MustCompile("^" + newPattern + "$")
 	m.RegexpPrefix = regexp.MustCompile("^" + newPattern + "(.*)$")
 	//for i, _ := range m.ParamNames {

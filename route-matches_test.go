@@ -39,6 +39,12 @@ func TestRoute_MatchRegexp(t *testing.T) {
 	//testMatch(t, `/files/{filename:[a-zA-Z0-9-_]+}\.{extension:[a-zA-Z0-9]{1,4}}`, "/files/caillou.mp3", true, true, "")
 }
 
+func TestRoute_MatchPanics(t *testing.T) {
+	// This following tests should trigger panics.
+	testMatch(t, `*/panic-now`, "/users/fisher", false, false, "")
+	testMatch(t, `/wrong-regular-expression/panic-**-now`, "/users/fisher", false, false, "")
+}
+
 // Test Route#MatchPath() and Route#MatchChildren() methods.
 func testMatch(t *testing.T, pattern, path string, expected bool, expectedMatchChildren bool, expectedRemainingPath string) {
 	route := NewRoute(pattern, nil)
