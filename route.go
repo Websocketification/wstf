@@ -67,7 +67,7 @@ func NewRoute(pattern string, router *Router) Route {
 	//}
 
 	//r.names = append(r.names, names)
-	//m.ListenMethod(METHOD_ALL, processors...)
+	//m.ListenMethod(MethodAll, processors...)
 	return m
 }
 
@@ -77,7 +77,7 @@ func (m Route) Handle(remainingPath string, req Request, res Response, next func
 		if m.Router != nil {
 			m.Router.Handle("", req, res, next)
 		} else {
-			HandleMethods(m.Processors[METHOD_ALL], req, res, func() {
+			HandleMethods(m.Processors[MethodAll], req, res, func() {
 				HandleMethods(m.Processors[req.Method], req, res, next)
 			})
 		}

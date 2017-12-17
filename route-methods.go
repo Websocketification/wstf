@@ -5,10 +5,10 @@ import (
 )
 
 // General method that matches all method.
-const METHOD_ALL = "ALL"
+const MethodAll = "ALL"
 
 func (m Route) All(processors func(req Request, res Response, next func())) Route {
-	m.ListenMethod(METHOD_ALL, processors)
+	m.ListenMethod(MethodAll, processors)
 	return m
 }
 
