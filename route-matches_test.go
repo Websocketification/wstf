@@ -25,9 +25,10 @@ func TestRoute_MatchParameterPattern(t *testing.T) {
 
 // Test the `*` asterisk mark.
 func TestRoute_MatchAsteriskMark(t *testing.T) {
-	testMatch(t, `/users/{userName}/*`, "/users/fisher", false, false, "")
-	testMatch(t, `/users/{userName}/*`, "/users/fisher/Whatever", true, true, "")
-	testMatch(t, `/users/{userName}/*`, "/users/fisher/Whatever/etc", false, true, "/etc")
+	testMatch(t, `/users/{userName}/.*`, "/users/fisher", false, false, "")
+	testMatch(t, `/users/{userName}/.*`, "/users/fisher/Whatever", true, true, "")
+	testMatch(t, `/users/{userName}/.*`, "/users/fisher/Whatever/etc", true, true, "")
+	testMatch(t, `/users/{userName}/[^/]*`, "/users/fisher/Whatever/etc", false, true, "/etc")
 }
 
 func TestRoute_MatchRegexp(t *testing.T) {
