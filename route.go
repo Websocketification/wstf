@@ -73,7 +73,7 @@ func NewRoute(pattern string, router *Router) Route {
 
 // GivenPath > whether match this route.
 func (m Route) Handle(remainingPath string, req Request, res Response, next func()) {
-	if m.Match(remainingPath, req, res) {
+	if m.MatchPath(remainingPath, req, res) {
 		if m.Router != nil {
 			m.Router.Handle("", req, res, next)
 		} else {
@@ -81,7 +81,7 @@ func (m Route) Handle(remainingPath string, req Request, res Response, next func
 				HandleMethods(m.Processors[req.Method], req, res, next)
 			})
 		}
-	} else if matched, remainingPath := m.MatchPrefixPath(remainingPath, req, res); m.Router != nil && matched {
+	} else if matched, remainingPath := m.MatchChildren(remainingPath, req, res); m.Router != nil && matched {
 		// Here can be optimized!
 		m.Router.Handle(remainingPath, req, res, next)
 	} else {
