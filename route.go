@@ -7,14 +7,18 @@ import (
 )
 
 // @see https://github.com/yuya-takeyama/regexprouter/blob/master/regexprouter.go
+// @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+// @see README.md#Parameter-Pattern
+// > The **Parameter Pattern** conforms to the form: `{parameter-name:regexp-expression}`
+// This regexp is used to find parameters and their corresponding configure
 var patternRegexp = regexp.MustCompile(`\{([^\}:]+)(?::([^\}]+))?\}`)
 
 type Route struct {
-	// Regexp for matching path.
+	// The Regexp for matching path.
 	Regexp *regexp.Regexp
 	// Regexp for matching children.
 	RegexpPrefix *regexp.Regexp
-	// Given pattern.
+	// The original pattern given by initializer.
 	Pattern string
 	// Parameter names in given pattern.
 	ParamNames []string
@@ -30,13 +34,18 @@ func NewRoute(pattern string, router *Router) Route {
 		Processors: make(map[string][]func(req Request, res Response, next func())),
 		Router:     router,
 	}
+
+	// Find all the parameters.
 	parameters := patternRegexp.FindAllStringSubmatch(pattern, -1)
 	for _, parameter := range parameters {
 		name := parameter[1]
 		m.ParamNames = append(m.ParamNames, name)
 	}
-	newPattern := patternRegexp.ReplaceAllStringFunc(pattern, func(s string) string {
-		foos := strings.SplitN(s, ":", 2)
+
+	// Set up regexps.
+	newPattern := patternRegexp.ReplaceAllStringFunc(pattern, func(subMatch string) string {
+		// The sub match string conforms the parameter pattern: `{parameter-name:regexp-expression}`.
+		foos := strings.SplitN(subMatch, ":", 2)
 		if len(foos) < 2 {
 			return `([^/]+)`
 		} else {
