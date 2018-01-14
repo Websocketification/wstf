@@ -23,15 +23,15 @@ type Route struct {
 	// Parameter names in given pattern.
 	ParamNames []string
 	// Processors take effects only when Router is nil.
-	Processors map[string][]func(req Request, res Response, next func())
+	Processors map[string][]func(req *Request, res *Response, next func())
 	Router     *Router
 }
 
 // Create a new route with a specific path.
-func NewRoute(pattern string, router *Router) Route {
-	m := Route{
+func NewRoute(pattern string, router *Router) *Route {
+	m := &Route{
 		Pattern:    pattern,
-		Processors: make(map[string][]func(req Request, res Response, next func())),
+		Processors: make(map[string][]func(req *Request, res *Response, next func())),
 		Router:     router,
 	}
 
@@ -79,7 +79,7 @@ func NewRoute(pattern string, router *Router) Route {
 }
 
 // GivenPath > whether match this route.
-func (m Route) Handle(remainingPath string, req Request, res Response, next func()) {
+func (m *Route) Handle(remainingPath string, req *Request, res *Response, next func()) {
 	if m.MatchPath(remainingPath, req, res) {
 		if m.Router != nil {
 			m.Router.Handle("", req, res, next)

@@ -3,11 +3,11 @@ package wstf
 // Requests handler.
 type Handler interface {
 	// Handle a request.
-	Handle(remainingPath string, req Request, res Response, next func())
+	Handle(remainingPath string, req *Request, res *Response, next func())
 }
 
 // Call routes recursively in order unless the next is called.
-func HandleRoutes(remainingPath string, routes []Route, req Request, res Response, next func()) {
+func HandleRoutes(remainingPath string, routes []*Route, req *Request, res *Response, next func()) {
 	if routes == nil || len(routes) == 0 {
 		next()
 		return
@@ -27,7 +27,7 @@ func HandleRoutes(remainingPath string, routes []Route, req Request, res Respons
 }
 
 // Call routers recursively in order unless the next is called.
-func HandleRouters(remainingPath string, routers []Router, req Request, res Response, next func()) {
+func HandleRouters(remainingPath string, routers []*Router, req *Request, res *Response, next func()) {
 	if routers == nil || len(routers) == 0 {
 		next()
 		return
@@ -47,7 +47,7 @@ func HandleRouters(remainingPath string, routers []Router, req Request, res Resp
 }
 
 // Call processors recursively in order unless the next is called.
-func HandleMethods(processors []func(req Request, res Response, next func()), req Request, res Response, next func()) {
+func HandleMethods(processors []func(req *Request, res *Response, next func()), req *Request, res *Response, next func()) {
 	if processors == nil || len(processors) == 0 {
 		next()
 		return

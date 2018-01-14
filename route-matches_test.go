@@ -48,8 +48,8 @@ func TestRoute_MatchPanics(t *testing.T) {
 // Test Route#MatchPath() and Route#MatchChildren() methods.
 func testMatch(t *testing.T, pattern, path string, expected bool, expectedMatchChildren bool, expectedRemainingPath string) {
 	route := NewRoute(pattern, nil)
-	req := *NewFakeRequest()
-	res := *NewFakeResponse()
+	req := NewFakeRequest()
+	res := NewFakeResponse()
 	matched := route.MatchPath(path, req, res)
 	if matched != expected {
 		t.Fatal("Failed to match path for [", pattern, path, "], expected [", expected, "] vs got [", matched, "]")

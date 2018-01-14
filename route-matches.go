@@ -2,7 +2,7 @@ package wstf
 
 // If the given path matches this route,
 // it should exactly match the given pattern.
-func (m Route) MatchPath(remainingPath string, request Request, response Response) bool {
+func (m *Route) MatchPath(remainingPath string, request *Request, response *Response) bool {
 	//fmt.Println("Matching: ", m.Pattern, remainingPath, Stringify(request))
 	// It can only have one match since the pattern is `^(.+)$` like.
 	matches := m.Regexp.FindAllStringSubmatch(remainingPath, 1)
@@ -34,7 +34,7 @@ func (m Route) MatchPath(remainingPath string, request Request, response Respons
 
 // Whether pattern matches prefix path of given path.
 // Return whether it matches and the remainingPath if it matches.
-func (m Route) MatchChildren(remainingPath string, request Request, response Response) (bool, string) {
+func (m *Route) MatchChildren(remainingPath string, request *Request, response *Response) (bool, string) {
 	//fmt.Println("Matching PrefixPath: ", m.Pattern, remainingPath, Stringify(request))
 	matches := m.RegexpPrefix.FindAllStringSubmatch(remainingPath, 1)
 	if len(matches) == 0 {
