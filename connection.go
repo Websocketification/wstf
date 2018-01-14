@@ -10,11 +10,11 @@ import (
 type Connection struct {
 }
 
-func NewConnection(app Application, conn *websocket.Conn, request *http.Request) Connection {
-	connection := Connection{}
+func NewConnection(app *Application, conn *websocket.Conn, request *http.Request) *Connection {
+	connection := &Connection{}
 	connectionLocals := map[string]interface{}{}
 	res := NewResponse(conn, connectionLocals, request, "")
-	req := Request{}
+	req := &Request{}
 	app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
 		fmt.Println("A device is connected:", request.URL.Path)
 	})
@@ -30,7 +30,7 @@ func NewConnection(app Application, conn *websocket.Conn, request *http.Request)
 			log.Fatal("Failed to parse request json string.", err)
 		}
 		res := NewResponse(conn, connectionLocals, request, req.ID)
-		app.RootRouter.Handle(req.Path, *req, res, func() {
+		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
 			res.Error(404, "Unhandled request!")
 		})

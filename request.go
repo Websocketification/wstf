@@ -17,7 +17,7 @@ type Request struct {
 	// The query part of request which is a JSON object and usually typed as map[string]string.
 	Query interface{} `json:"query"`
 	// Headers of the request.
-	Headers map[string](string) `json:"headers"`
+	Headers map[string]string `json:"headers"`
 	// The request body of request, a JSON object.
 	Body interface{} `json:"body"`
 }
@@ -25,7 +25,7 @@ type Request struct {
 func NewRequest(jsonBytes []byte) (*Request, error) {
 	var req *Request
 	err := json.Unmarshal(jsonBytes, &req)
-	req.Params = map[string]string{}
+	req.Params = make(map[string]string)
 	if !req.IsRequestValid() {
 		return nil, errors.New("expected fields is empty")
 	}
@@ -33,6 +33,6 @@ func NewRequest(jsonBytes []byte) (*Request, error) {
 }
 
 // Is the request valid.
-func (m Request) IsRequestValid() bool {
+func (m *Request) IsRequestValid() bool {
 	return !(m.ID == "" || m.Method == "" || m.Path == "")
 }
