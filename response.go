@@ -2,9 +2,10 @@ package wstf
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
-	"net/http"
 	"fmt"
+	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 type Response struct {

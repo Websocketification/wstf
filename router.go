@@ -32,4 +32,3 @@ func (m *Router) Use(pattern string) *Route {
 func (m *Router) Handle(remainingPath string, req *Request, res *Response, next func()) {
 	HandleRoutes(remainingPath, m.Routes, req, res, next)
 }
-
