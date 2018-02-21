@@ -40,3 +40,29 @@ func NewRequest(jsonBytes []byte) (*Request, error) {
 func (m *Request) IsRequestValid() bool {
 	return !(m.ID == "" || m.Method == "" || m.Path == "")
 }
+
+// Unmarshal the request.Query into a given struct.
+// The obj should be pointer of some struct.
+func (m *Request) UnmarshalQuery(obj interface{}) error {
+	return json.Unmarshal(m.Query, obj)
+}
+
+// Unmarshal the request.Body into a given struct.
+// The obj should be pointer of some struct.
+func (m *Request) UnmarshalBody(obj interface{}) error {
+	return json.Unmarshal(m.Body, obj)
+}
+
+// Get the query unmarshaller.
+func (m *Request) GetQueryUnmarshaller() (*StructUnmarshaller, error) {
+	unmarshaller := &StructUnmarshaller{}
+	return unmarshaller, json.Unmarshal(m.Query, &unmarshaller.DataMap)
+}
+
+// Get the body unmarshaller.
+func (m *Request) GetBodyUnmarshaller() (*StructUnmarshaller, error) {
+	unmarshaller := &StructUnmarshaller{
+		RawMessage: m.Body,
+	}
+	return unmarshaller, json.Unmarshal(m.Body, &unmarshaller.DataMap)
+}
