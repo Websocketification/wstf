@@ -1,8 +1,9 @@
 package wstf
 
 import (
-	"net/http"
 	"log"
+	"net/http"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -20,9 +21,10 @@ type Application struct {
 	OnDisconnectionRouter *Router
 }
 
-// Create a new Application.
-func NewApplication() *Application {
-	return &Application{}
+// Create a new Application with root router.
+// Use the RootRouter as param in constructor because it is required.
+func NewApplication(rootRouter *Router) *Application {
+	return &Application{RootRouter: rootRouter}
 }
 
 // Get the handler func for websocket.
@@ -38,11 +40,11 @@ func (m *Application) GetWebsocketHandlerFunc() func(w http.ResponseWriter, r *h
 	return mHandler
 }
 
-// Set root router.
+// The RootRouter is required and hence we don't provide function to set or modify root router.
 // An application can have only one router as the home router.
-func (m *Application) SetRootRouter(router *Router) {
-	m.RootRouter = router
-}
+//func (m *Application) SetRootRouter(router *Router) {
+//	m.RootRouter = router
+//}
 
 func (m *Application) OnConnected(router *Router) {
 	m.OnConnectionRouter = router
