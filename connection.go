@@ -1,10 +1,11 @@
 package wstf
 
 import (
-	"log"
-	"github.com/gorilla/websocket"
 	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 type Connection struct {
@@ -15,9 +16,11 @@ func NewConnection(app *Application, conn *websocket.Conn, request *http.Request
 	connectionLocals := map[string]interface{}{}
 	res := NewResponse(conn, connectionLocals, request, "")
 	req := &Request{}
-	app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
-		fmt.Println("A device is connected:", request.URL.Path)
-	})
+	if app.OnConnectionRouter != nil {
+		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
+			fmt.Println("A device is connected:", request.URL.Path)
+		})
+	}
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
@@ -35,9 +38,11 @@ func NewConnection(app *Application, conn *websocket.Conn, request *http.Request
 			res.Error(404, "Unhandled request!")
 		})
 	}
-	app.OnDisconnectionRouter.Handle(request.URL.Path, req, res, func() {
-		fmt.Println("A device is connected:", request.URL.Path)
-	})
+	if app.OnDisconnectionRouter != nil {
+		app.OnDisconnectionRouter.Handle(request.URL.Path, req, res, func() {
+			fmt.Println("A device is connected:", request.URL.Path)
+		})
+	}
 	conn.Close()
 	return connection
 }

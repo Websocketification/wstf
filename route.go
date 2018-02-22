@@ -1,9 +1,9 @@
 package wstf
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
-	"fmt"
 )
 
 // @see https://github.com/yuya-takeyama/regexprouter/blob/master/regexprouter.go
