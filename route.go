@@ -15,9 +15,9 @@ type Route struct {
 	// The original pattern given by initializer.
 	Pattern string
 	// The Regexp for matching path.
-	Regexp *regexp.Regexp
+	PathRegexp *regexp.Regexp
 	// Regexp for matching children.
-	RegexpPrefix *regexp.Regexp
+	PrefixRegexp *regexp.Regexp
 	// Parameter names in given pattern.
 	ParamNames []string
 	// Processors take effects only when Router is nil.
