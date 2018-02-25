@@ -8,12 +8,12 @@ import (
 )
 
 type Response struct {
-	// The websocket connection.
-	Connection *websocket.Conn
-	// Locals scoped among the connection.
+	// The reference of wstf Connection.
+	Connection *Connection `json:"-"`
+	// Shortcut for Connection.Locals
 	ConnectionLocals map[string]interface{}
-	// The original http request.
-	HttpRequest *http.Request
+	// The reference of corresponding wstf Request.
+	Request *Request
 	// JSON Response that will be sent as response to corresponding request.
 	JsonResponse *JsonResponse
 	// A map that contains response local variables scoped to the request.
@@ -21,14 +21,14 @@ type Response struct {
 	Locals map[string]interface{}
 }
 
-func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestId string) *Response {
-	res := &Response{}
-	res.Connection = conn
-	res.ConnectionLocals = connectionLocals
-	res.HttpRequest = request
-	res.JsonResponse = &JsonResponse{Id: requestId}
-	res.Locals = map[string]interface{}{}
-	return res
+func NewResponse(connection *Connection, connectionLocals map[string]interface{}, request *Request) *Response {
+	return &Response{
+		connection,
+		connectionLocals,
+		request,
+		&JsonResponse{Id: request.Id},
+		make(map[string]interface{}),
+	}
 }
 
 func (m *Response) SetStatusCode(statusCode int) *Response {
@@ -52,7 +52,7 @@ func (m *Response) Write(mt int, message []byte) error {
 		fmt.Println("DEBUGGING MODE: Sending Message: ", string(message))
 		return nil
 	}
-	err := m.Connection.WriteMessage(mt, message)
+	err := m.Connection.WebSocketConn.WriteMessage(mt, message)
 	return err
 }
 

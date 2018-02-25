@@ -22,8 +22,8 @@ func (m *Connection) OnConnect() {
 	app := m.Application
 	conn := m.WebSocketConn
 	request := m.HttpRequest
-	res := NewResponse(conn, m.Locals, request, "")
 	req := &Request{Connection: m, HttpRequest: m.HttpRequest}
+	res := NewResponse(m, m.Locals, req)
 
 	if app.OnConnectionRouter != nil {
 		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
@@ -41,7 +41,7 @@ func (m *Connection) OnConnect() {
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
 		}
-		res := NewResponse(conn, m.Locals, request, req.Id)
+		res := NewResponse(m, m.Locals, req)
 		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
 			res.Error(http.StatusNotFound, "Unhandled request!")
