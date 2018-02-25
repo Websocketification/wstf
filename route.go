@@ -21,7 +21,7 @@ type Route struct {
 	// Parameter names in given pattern.
 	ParamNames []string
 	// Processors take effects only when Router is nil.
-	Processors map[string][]func(req *Request, res *Response, next func())
+	Processors map[string]Processors
 	// Router attached to the route.
 	Router *Router
 }
@@ -41,7 +41,7 @@ func NewRoute(pattern string, router *Router) *Route {
 		regexp.MustCompile("^" + newPattern + "$"),
 		regexp.MustCompile("^" + newPattern + "(.*)$"),
 		findParamNames(pattern),
-		make(map[string][]func(req *Request, res *Response, next func())),
+		make(map[string]Processors),
 		router,
 	}
 }

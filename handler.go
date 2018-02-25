@@ -47,7 +47,7 @@ func HandleRouters(remainingPath string, routers []*Router, req *Request, res *R
 }
 
 // Call processors recursively in order unless the next is called.
-func HandleMethods(processors []func(req *Request, res *Response, next func()), req *Request, res *Response, next func()) {
+func HandleMethods(processors Processors, req *Request, res *Response, next func()) {
 	if processors == nil || len(processors) == 0 {
 		next()
 		return
