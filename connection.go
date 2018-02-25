@@ -23,7 +23,7 @@ func (m *Connection) OnConnect() {
 	conn := m.WebSocketConn
 	request := m.HttpRequest
 	res := NewResponse(conn, m.Locals, request, "")
-	req := &Request{}
+	req := &Request{Connection: m, HttpRequest: m.HttpRequest}
 
 	if app.OnConnectionRouter != nil {
 		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
@@ -37,7 +37,7 @@ func (m *Connection) OnConnect() {
 			break
 		}
 		fmt.Println("Received: ", mt, string(message))
-		req, err := NewRequest(message)
+		req, err := NewRequest(message, m)
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
 		}
