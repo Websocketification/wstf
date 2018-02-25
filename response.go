@@ -1,7 +1,6 @@
 package wstf
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -20,25 +19,6 @@ type Response struct {
 	// A map that contains response local variables scoped to the request.
 	// This property is useful for exposing request-level information such as the request path name, authenticated user, user settings, and so on.
 	Locals map[string]interface{}
-}
-
-type JsonResponse struct {
-	// Unique http request identifier.
-	ID string `json:"id"`
-	// Headers to be send to client.
-	Headers map[string]string `json:"headers"`
-	// Http status.
-	Status int `json:"status"`
-	// Response body.
-	Body interface{} `json:"body"`
-}
-
-func (m *JsonResponse) ToJson() string {
-	str, err := json.Marshal(m)
-	if err != nil {
-		panic(err)
-	}
-	return string(str)
 }
 
 func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestID string) *Response {
