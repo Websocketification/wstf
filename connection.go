@@ -9,13 +9,22 @@ import (
 )
 
 type Connection struct {
+	Application *Application `json:"application"`
+	// The original http request.
+	HttpRequest *http.Request `json:"httpRequest"`
+	// The websocket connection.
+	WebSocketConn *websocket.Conn `json:"webSocketConn"`
+	// The local variables exist in the scope/lifecycle of connection.
+	Locals map[string]interface{} `json:"locals"`
 }
 
-func NewConnection(app *Application, conn *websocket.Conn, request *http.Request) *Connection {
-	connection := &Connection{}
-	connectionLocals := map[string]interface{}{}
-	res := NewResponse(conn, connectionLocals, request, "")
+func (m *Connection) OnConnect() {
+	app := m.Application
+	conn := m.WebSocketConn
+	request := m.HttpRequest
+	res := NewResponse(conn, m.Locals, request, "")
 	req := &Request{}
+
 	if app.OnConnectionRouter != nil {
 		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
 			fmt.Println("A device is connected:", request.URL.Path)
@@ -32,10 +41,10 @@ func NewConnection(app *Application, conn *websocket.Conn, request *http.Request
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
 		}
-		res := NewResponse(conn, connectionLocals, request, req.ID)
+		res := NewResponse(conn, m.Locals, request, req.ID)
 		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
-			res.Error(404, "Unhandled request!")
+			res.Error(http.StatusNotFound, "Unhandled request!")
 		})
 	}
 	if app.OnDisconnectionRouter != nil {
@@ -44,5 +53,4 @@ func NewConnection(app *Application, conn *websocket.Conn, request *http.Request
 		})
 	}
 	conn.Close()
-	return connection
 }

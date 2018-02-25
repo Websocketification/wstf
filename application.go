@@ -29,12 +29,13 @@ func NewApplication(rootRouter *Router) *Application {
 // Get the handler func for websocket.
 func (m *Application) GetWebsocketHandlerFunc(upgradeToWebSocketFailedCallback func(err error, w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	mHandler := func(w http.ResponseWriter, r *http.Request) {
-		c, err := upgrader.Upgrade(w, r, nil)
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			upgradeToWebSocketFailedCallback(err, w, r)
 			return
 		}
-		NewConnection(m, c, r)
+		connection := m.NewConnection(conn, r)
+		connection.OnConnect()
 	}
 	return mHandler
 }
@@ -51,4 +52,14 @@ func (m *Application) OnConnected(router *Router) {
 
 func (m *Application) OnDisconnected(router *Router) {
 	m.OnDisconnectionRouter = router
+}
+
+// Create a connection instance once a WebSocket connection is established and connected.
+func (m *Application) NewConnection(conn *websocket.Conn, req *http.Request) *Connection {
+	return &Connection{
+		m,
+		req,
+		conn,
+		make(map[string]interface{}),
+	}
 }
