@@ -9,7 +9,7 @@ import (
 // @see json.RawMessage
 type Request struct {
 	// The request unique ID.
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// HTTP Method.
 	Method string `json:"method"`
 	// Non-empty path.
@@ -38,7 +38,7 @@ func NewRequest(jsonBytes []byte) (*Request, error) {
 
 // Is the request valid.
 func (m *Request) IsRequestValid() bool {
-	return !(m.ID == "" || m.Method == "" || m.Path == "")
+	return !(m.Id == "" || m.Method == "" || m.Path == "")
 }
 
 // Unmarshal the request.Query into a given struct.

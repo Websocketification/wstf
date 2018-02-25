@@ -41,7 +41,7 @@ func (m *Connection) OnConnect() {
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
 		}
-		res := NewResponse(conn, m.Locals, request, req.ID)
+		res := NewResponse(conn, m.Locals, request, req.Id)
 		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
 			res.Error(http.StatusNotFound, "Unhandled request!")

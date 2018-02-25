@@ -21,12 +21,12 @@ type Response struct {
 	Locals map[string]interface{}
 }
 
-func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestID string) *Response {
+func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestId string) *Response {
 	res := &Response{}
 	res.Connection = conn
 	res.ConnectionLocals = connectionLocals
 	res.HttpRequest = request
-	res.JsonResponse = &JsonResponse{ID: requestID}
+	res.JsonResponse = &JsonResponse{Id: requestId}
 	res.Locals = map[string]interface{}{}
 	return res
 }
