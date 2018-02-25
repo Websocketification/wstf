@@ -1,9 +1,7 @@
 package wstf
 
 import (
-	"fmt"
 	"regexp"
-	"strings"
 )
 
 // @see https://github.com/yuya-takeyama/regexprouter/blob/master/regexprouter.go
@@ -14,68 +12,38 @@ import (
 var patternRegexp = regexp.MustCompile(`\{([^\}:]+)(?::([^\}]+))?\}`)
 
 type Route struct {
-	// The Regexp for matching path.
-	Regexp *regexp.Regexp
-	// Regexp for matching children.
-	RegexpPrefix *regexp.Regexp
 	// The original pattern given by initializer.
 	Pattern string
+	// The Regexp for matching path.
+	PathRegexp *regexp.Regexp
+	// Regexp for matching children.
+	PrefixRegexp *regexp.Regexp
 	// Parameter names in given pattern.
 	ParamNames []string
 	// Processors take effects only when Router is nil.
-	Processors map[string][]func(req *Request, res *Response, next func())
-	Router     *Router
+	Processors map[string]Processors
+	// Router attached to the route.
+	Router *Router
 }
 
 // Create a new route with a specific path.
 func NewRoute(pattern string, router *Router) *Route {
-	m := &Route{
-		Pattern:    pattern,
-		Processors: make(map[string][]func(req *Request, res *Response, next func())),
-		Router:     router,
-	}
-
 	// Pre-process the pattern.
 	//pattern = strings.Replace(pattern, "*", `.*`, -1)
-
-	// Find all the parameters.
-	parameters := patternRegexp.FindAllStringSubmatch(pattern, -1)
-	for _, parameter := range parameters {
-		name := parameter[1]
-		m.ParamNames = append(m.ParamNames, name)
-	}
-
-	// Set up regexps.
-	newPattern := patternRegexp.ReplaceAllStringFunc(pattern, func(subMatch string) string {
-		// The sub match string conforms the parameter pattern: `{parameter-name:regexp-expression}`.
-		foos := strings.SplitN(subMatch, ":", 2)
-		if len(foos) < 2 {
-			return `([^/]+)`
-		} else {
-			return "(" + foos[1][0:len(foos[1])-1] + ")"
-		}
-	})
-
-	fmt.Println("newPattern: ", newPattern, m.ParamNames)
+	newPattern, err := generatePatternForRegexp(pattern)
 	// Panic for abnormal patterns.
-	_, err := regexp.Compile(newPattern)
 	if err != nil {
 		panic("pattern [" + newPattern + "] is not recognized as normal.")
 	}
 
-	m.Regexp = regexp.MustCompile("^" + newPattern + "$")
-	m.RegexpPrefix = regexp.MustCompile("^" + newPattern + "(.*)$")
-	//for i, _ := range m.ParamNames {
-	//	if i == 0 {
-	//processors = append(processors, fn)
-	//} else {
-	//processors = append(processors, nil)
-	//}
-	//}
-
-	//r.names = append(r.names, names)
-	//m.ListenMethod(MethodAll, processors...)
-	return m
+	return &Route{
+		pattern,
+		regexp.MustCompile("^" + newPattern + "$"),
+		regexp.MustCompile("^" + newPattern + "(.*)$"),
+		findParamNames(pattern),
+		make(map[string]Processors),
+		router,
+	}
 }
 
 // GivenPath > whether match this route.

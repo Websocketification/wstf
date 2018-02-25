@@ -3,13 +3,19 @@ package wstf
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 )
 
 // @see http://eagain.net/articles/go-dynamic-json/
 // @see json.RawMessage
 type Request struct {
+	// Link to Connection.
+	Connection *Connection `json:"-"`
+	// Shortcut for Connection.HttpRequest
+	HttpRequest *http.Request `json:"-"`
+	// The following fields are unmarshal-led from json string from client.
 	// The request unique ID.
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// HTTP Method.
 	Method string `json:"method"`
 	// Non-empty path.
@@ -26,19 +32,26 @@ type Request struct {
 
 // The json.RawMessage type is used for some fields(Query & Body) of request
 // to store the original partial json bytes and delay JSON decoding.
-func NewRequest(jsonBytes []byte) (*Request, error) {
+func NewRequest(jsonBytes []byte, connection *Connection) (*Request, error) {
 	var req *Request
 	err := json.Unmarshal(jsonBytes, &req)
-	req.Params = make(map[string]string)
+	if err != nil {
+		return nil, err
+	}
 	if !req.IsRequestValid() {
 		return nil, errors.New("expected fields is empty")
+	}
+	req.Params = make(map[string]string)
+	if connection != nil {
+		req.Connection = connection
+		req.HttpRequest = connection.HttpRequest
 	}
 	return req, err
 }
 
 // Is the request valid.
 func (m *Request) IsRequestValid() bool {
-	return !(m.ID == "" || m.Method == "" || m.Path == "")
+	return !(m.Id == "" || m.Method == "" || m.Path == "")
 }
 
 // Unmarshal the request.Query into a given struct.

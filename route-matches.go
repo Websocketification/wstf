@@ -5,7 +5,7 @@ package wstf
 func (m *Route) MatchPath(remainingPath string, request *Request, response *Response) bool {
 	//fmt.Println("Matching: ", m.Pattern, remainingPath, Stringify(request))
 	// It can only have one match since the pattern is `^(.+)$` like.
-	matches := m.Regexp.FindAllStringSubmatch(remainingPath, 1)
+	matches := m.PathRegexp.FindAllStringSubmatch(remainingPath, 1)
 	if len(matches) == 0 {
 		return false
 	}
@@ -36,7 +36,7 @@ func (m *Route) MatchPath(remainingPath string, request *Request, response *Resp
 // Return whether it matches and the remainingPath if it matches.
 func (m *Route) MatchChildren(remainingPath string, request *Request, response *Response) (bool, string) {
 	//fmt.Println("Matching PrefixPath: ", m.Pattern, remainingPath, Stringify(request))
-	matches := m.RegexpPrefix.FindAllStringSubmatch(remainingPath, 1)
+	matches := m.PrefixRegexp.FindAllStringSubmatch(remainingPath, 1)
 	if len(matches) == 0 {
 		return false, ""
 	}

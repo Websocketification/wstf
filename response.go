@@ -1,7 +1,6 @@
 package wstf
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,12 +8,12 @@ import (
 )
 
 type Response struct {
-	// The websocket connection.
-	Connection *websocket.Conn
-	// Locals scoped among the connection.
+	// The reference of wstf Connection.
+	Connection *Connection `json:"-"`
+	// Shortcut for Connection.Locals
 	ConnectionLocals map[string]interface{}
-	// The original http request.
-	HttpRequest *http.Request
+	// The reference of corresponding wstf Request.
+	Request *Request
 	// JSON Response that will be sent as response to corresponding request.
 	JsonResponse *JsonResponse
 	// A map that contains response local variables scoped to the request.
@@ -22,47 +21,19 @@ type Response struct {
 	Locals map[string]interface{}
 }
 
-type JsonResponse struct {
-	// Unique http request identifier.
-	ID string `json:"id"`
-	// Headers to be send to client.
-	Headers map[string]string `json:"headers"`
-	// Http status.
-	Status int `json:"status"`
-	// Response body.
-	Body interface{} `json:"body"`
-}
-
-func (m *JsonResponse) ToJson() string {
-	str, err := json.Marshal(m)
-	if err != nil {
-		panic(err)
+func NewResponse(connection *Connection, connectionLocals map[string]interface{}, request *Request) *Response {
+	return &Response{
+		connection,
+		connectionLocals,
+		request,
+		&JsonResponse{Id: request.Id},
+		make(map[string]interface{}),
 	}
-	return string(str)
 }
 
-func NewResponse(conn *websocket.Conn, connectionLocals map[string]interface{}, request *http.Request, requestID string) *Response {
-	res := &Response{}
-	res.Connection = conn
-	res.ConnectionLocals = connectionLocals
-	res.HttpRequest = request
-	res.JsonResponse = &JsonResponse{ID: requestID}
-	res.Locals = map[string]interface{}{}
-	return res
-}
-
-// Response the request with status code 200.
-func (m *Response) Done(body interface{}) {
-	m.JsonResponse.Status = http.StatusOK
-	m.JsonResponse.Body = body
-	m.End()
-}
-
-// Response the request with specific status code.
-func (m *Response) Error(httpStatusCode int, error interface{}) {
-	m.JsonResponse.Status = httpStatusCode
-	fmt.Println("Responsing Error: ", error)
-	m.End()
+func (m *Response) SetStatusCode(statusCode int) *Response {
+	m.JsonResponse.Status = statusCode
+	return m
 }
 
 // Set header.
@@ -81,6 +52,20 @@ func (m *Response) Write(mt int, message []byte) error {
 		fmt.Println("DEBUGGING MODE: Sending Message: ", string(message))
 		return nil
 	}
-	err := m.Connection.WriteMessage(mt, message)
+	err := m.Connection.WebSocketConn.WriteMessage(mt, message)
 	return err
+}
+
+// Response the request with status code 200.
+func (m *Response) Done(body interface{}) {
+	m.SetStatusCode(http.StatusOK)
+	m.JsonResponse.Body = body
+	m.End()
+}
+
+// Response the request with specific status code.
+func (m *Response) Error(statusCode int, errors ... interface{}) {
+	m.SetStatusCode(statusCode)
+	fmt.Println("Responsing Error: ", errors)
+	m.End()
 }
