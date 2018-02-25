@@ -1,7 +1,6 @@
 package wstf
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -28,11 +27,11 @@ func NewApplication(rootRouter *Router) *Application {
 }
 
 // Get the handler func for websocket.
-func (m *Application) GetWebsocketHandlerFunc() func(w http.ResponseWriter, r *http.Request) {
+func (m *Application) GetWebsocketHandlerFunc(upgradeToWebSocketFailedCallback func(err error, w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	mHandler := func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Print("Upgrade Error:", err)
+			upgradeToWebSocketFailedCallback(err, w, r)
 			return
 		}
 		NewConnection(m, c, r)
