@@ -2,7 +2,6 @@ package wstf
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -42,16 +41,27 @@ func (m *Connection) OnConnect() {
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("read: ", err, mt)
+			if app.OnReadMessageFailed != nil {
+				app.OnReadMessageFailed(m, err)
+			}
 			break
 		}
-		if len(message) == 0 || message[0] != JsonObjectPrefix {
-			m.HandleMessage(message)
+		if app.OnReceiveMessage != nil {
+			app.OnReceiveMessage(m, mt, message)
+		}
+		if mt != websocket.TextMessage || len(message) == 0 || message[0] != JsonObjectPrefix {
+			m.HandleMessage(mt, message)
 			continue
 		}
 		req, err := NewRequest(message, m)
 		if err != nil {
-			log.Fatal("Failed to parse request json string.", err)
+			if app.OnReceiveInvalidRequest != nil {
+				app.OnReceiveInvalidRequest(m, mt, message)
+			}
+			if app.OnReceiveUnhandledMessage != nil {
+				m.Application.OnReceiveUnhandledMessage(m, mt, message)
+			}
+			continue
 		}
 		res := NewResponse(m, m.Locals, req)
 		app.RootRouter.Handle(req.Path, req, res, func() {
@@ -68,9 +78,18 @@ func (m *Connection) OnConnect() {
 }
 
 // Handle known and unknown messages.
-func (m *Connection) HandleMessage(message []byte) {
-	msg := string(message)
-	if msg == CmdPingString {
-		m.WebSocketConn.WriteMessage(websocket.TextMessage, CmdPongBytes)
+func (m *Connection) HandleMessage(messageType int, message []byte) {
+	if messageType == websocket.TextMessage {
+		msg := string(message)
+		if msg == CmdPingString {
+			m.WebSocketConn.WriteMessage(websocket.TextMessage, CmdPongBytes)
+			return
+		}
+		if msg == CmdPongString {
+			return
+		}
+	}
+	if m.Application.OnReceiveUnhandledMessage != nil {
+		m.Application.OnReceiveUnhandledMessage(m, messageType, message)
 	}
 }
