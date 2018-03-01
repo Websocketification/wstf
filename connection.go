@@ -8,6 +8,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Defined commands.
+const CmdPrefix = '$'
+const CmdPingString = "$PING"
+const CmdPongString = "$PONG"
+const JsonObjectPrefix = '{'
+
+var CmdPingBytes = []byte(CmdPingString)
+var CmdPongBytes = []byte(CmdPongString)
+
 type Connection struct {
 	Application *Application `json:"application"`
 	// The original http request.
@@ -36,7 +45,10 @@ func (m *Connection) OnConnect() {
 			fmt.Println("read: ", err, mt)
 			break
 		}
-		fmt.Println("Received: ", mt, string(message))
+		if len(message) == 0 || message[0] != JsonObjectPrefix {
+			m.HandleMessage(message)
+			continue
+		}
 		req, err := NewRequest(message, m)
 		if err != nil {
 			log.Fatal("Failed to parse request json string.", err)
@@ -53,4 +65,12 @@ func (m *Connection) OnConnect() {
 		})
 	}
 	conn.Close()
+}
+
+// Handle known and unknown messages.
+func (m *Connection) HandleMessage(message []byte) {
+	msg := string(message)
+	if msg == CmdPingString {
+		m.WebSocketConn.WriteMessage(websocket.TextMessage, CmdPongBytes)
+	}
 }
