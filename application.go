@@ -18,6 +18,15 @@ type Application struct {
 	OnConnectionRouter *Router
 	// Router that will be handled on device is disconnected.
 	OnDisconnectionRouter *Router
+
+	// On read message from client failed, which literally means connection is closed.
+	OnReadMessageFailed func(connection *Connection, err error)
+	// On received message from client.
+	OnReceiveMessage func(connection *Connection, messageType int, message []byte)
+	// Call when received message is not recognized(and hence unhandled) as requests or other commands.
+	OnReceiveUnhandledMessage func(connection *Connection, messageType int, message []byte)
+	// Call when received message starts with '{', but is not a valid request.
+	OnReceiveInvalidRequest func(connection *Connection, messageType int, message []byte)
 }
 
 // Create a new Application with root router.

@@ -4,10 +4,12 @@ package wstf
 type JsonResponse struct {
 	// Unique http request identifier.
 	Id string `json:"id"`
-	// Headers to be send to client.
-	Headers map[string]string `json:"headers"`
 	// Http status.
 	Status int `json:"status"`
+	// The http status text.
+	//StatusText string `json:"statusText"`
+	// Headers to be send to client.
+	Headers map[string]string `json:"headers"`
 	// Response body.
 	Body interface{} `json:"body"`
 }

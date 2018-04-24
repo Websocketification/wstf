@@ -2,7 +2,6 @@ package wstf
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/gorilla/websocket"
 )
@@ -31,6 +30,9 @@ func NewResponse(connection *Connection, connectionLocals map[string]interface{}
 	}
 }
 
+// The raw methods to access Response.JsonResponse.
+
+// Set status code.
 func (m *Response) SetStatusCode(statusCode int) *Response {
 	m.JsonResponse.Status = statusCode
 	return m
@@ -39,6 +41,12 @@ func (m *Response) SetStatusCode(statusCode int) *Response {
 // Set header.
 func (m *Response) SetHeader(key, value string) {
 	m.JsonResponse.Headers[key] = value
+}
+
+// Set json-response body.
+func (m *Response) SetBody(body interface{}) *Response {
+	m.JsonResponse.Body = body
+	return m
 }
 
 // Finish the request.
@@ -54,18 +62,4 @@ func (m *Response) Write(mt int, message []byte) error {
 	}
 	err := m.Connection.WebSocketConn.WriteMessage(mt, message)
 	return err
-}
-
-// Response the request with status code 200.
-func (m *Response) Done(body interface{}) {
-	m.SetStatusCode(http.StatusOK)
-	m.JsonResponse.Body = body
-	m.End()
-}
-
-// Response the request with specific status code.
-func (m *Response) Error(statusCode int, errors ... interface{}) {
-	m.SetStatusCode(statusCode)
-	fmt.Println("Responsing Error: ", errors)
-	m.End()
 }
