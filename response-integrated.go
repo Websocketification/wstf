@@ -15,5 +15,5 @@ func (m *Response) Done(body interface{}) {
 // Response the request with specific status code.
 func (m *Response) Error(statusCode int, error interface{}) {
 	m.SetStatusCode(statusCode).End()
-	fmt.Println("Responsing Error: ", error)
+	fmt.Println("Responsing Error:", error)
 }
