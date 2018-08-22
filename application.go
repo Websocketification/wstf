@@ -6,11 +6,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
-	// Enable cross domain.
-	return true
-}} // use default options
-
 type Application struct {
 	// Main router.
 	RootRouter *Router
@@ -35,15 +30,44 @@ func NewApplication(rootRouter *Router) *Application {
 	return &Application{RootRouter: rootRouter}
 }
 
-// Get the handler func for websocket.
-func (m *Application) GetWebsocketHandlerFunc(upgradeToWebSocketFailedCallback func(err error, w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+// Get the WebSocket handler for http routing.
+//
+// The #onNotAbleToUpgradeToWebSocket() will be called if the request not be able to upgrade( by checking request
+// metadata, like headers, @see upgrader#AbleToUpgrade()).
+//
+// The #getWebSocketResponseHeader() will be called if the request can be upgraded. It is expected to
+// 1. return `*, false` to *reject* WebSocket connection request.
+//     - You should handle http.ResponseWrite yourself, like response a status code with some message.
+// 2. return `*http.Header, true` to *accept* the WebSocket connection request.
+//     - In this case, you should ignore the http.ResponseWrite.
+//     - If the #responseHeader is not nil, it will be included in the response to the client's upgrade request and may
+//        be used to specify cookies (Set-Cookie) and the application negotiated subprotocol (Sec-WebSocket-Protocol),
+//        you may checkout github.com/gorilla/websocket/server.go#Upgrade() for more info.
+//
+// The #onUpgradeToWebSocketFailed() will be called if the request can be upgraded to WebSocket but failed to. The callback
+// may be rarely called.
+func (m *Application) GetWebsocketHandlerFunc(
+	upgrader *websocket.Upgrader,
+	onNotAbleToUpgradeToWebSocket func(w http.ResponseWriter, r *http.Request),
+	getWebSocketResponseHeader func(conn *Connection, w http.ResponseWriter) (*http.Header, bool),
+	onUpgradingToWebSocketFailed func(err error, w http.ResponseWriter, r *http.Request),
+) func(w http.ResponseWriter, r *http.Request) {
 	mHandler := func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			upgradeToWebSocketFailedCallback(err, w, r)
+		if !AbleToUpgrade(upgrader, w, r) {
+			onNotAbleToUpgradeToWebSocket(w, r)
 			return
 		}
-		connection := m.NewConnection(conn, r)
+		connection := m.NewConnection(nil, r)
+		responseHeader, pass := getWebSocketResponseHeader(connection, w)
+		if !pass {
+			return
+		}
+		conn, err := upgrader.Upgrade(w, r, *responseHeader)
+		if err != nil {
+			onUpgradingToWebSocketFailed(err, w, r)
+			return
+		}
+		connection.WebSocketConn = conn
 		connection.OnConnect()
 	}
 	return mHandler
