@@ -4,6 +4,13 @@
 
 Websocketification in Golang.
 
+## Supports
+
+- [x] Check the request headers before upgrading, @see [`upgrader-helper.go#AbleToUpgrade()`](https://godoc.org/github.com/Websocketification/wstf#AbleToUpgrade).
+	- [x] Check the request `Origin` for [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) before upgrading.
+- [x] Support middleware to **accept** or **reject** the WebSocket connection request, @see [`application.go#GetWebsocketHandlerFunc()`](https://godoc.org/github.com/Websocketification/wstf#Application.GetWebsocketHandlerFunc).
+- [x] Set cookies *only* if the request can be upgraded.
+
 ## Examples
 
 ```go
