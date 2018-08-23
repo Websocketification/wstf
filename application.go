@@ -22,6 +22,8 @@ type Application struct {
 	OnReceiveUnhandledMessage func(conn *Connection, messageType int, message []byte)
 	// Call when received message starts with '{', but is not a valid request.
 	OnReceiveInvalidRequest func(conn *Connection, messageType int, message []byte)
+	// On received a valid request from client.
+	OnReceiveRequest func(req *Request, res *Response, message []byte)
 }
 
 // Create a new Application with root router.

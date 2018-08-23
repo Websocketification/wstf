@@ -68,6 +68,10 @@ func (m *Connection) OnConnect() {
 			}
 			continue
 		}
+		if app.OnReceiveRequest != nil {
+			// CALLBACK for request.
+			app.OnReceiveRequest(req, res, message)
+		}
 		res := NewResponse(m, m.Locals, req)
 		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
