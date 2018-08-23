@@ -15,13 +15,13 @@ type Application struct {
 	OnDisconnectionRouter *Router
 
 	// On read message from client failed, which literally means connection is closed.
-	OnReadMessageFailed func(connection *Connection, err error)
+	OnReadMessageFailed func(conn *Connection, err error)
 	// On received message from client.
-	OnReceiveMessage func(connection *Connection, messageType int, message []byte)
+	OnReceiveMessage func(conn *Connection, messageType int, message []byte)
 	// Call when received message is not recognized(and hence unhandled) as requests or other commands.
-	OnReceiveUnhandledMessage func(connection *Connection, messageType int, message []byte)
+	OnReceiveUnhandledMessage func(conn *Connection, messageType int, message []byte)
 	// Call when received message starts with '{', but is not a valid request.
-	OnReceiveInvalidRequest func(connection *Connection, messageType int, message []byte)
+	OnReceiveInvalidRequest func(conn *Connection, messageType int, message []byte)
 }
 
 // Create a new Application with root router.
@@ -52,25 +52,24 @@ func (m *Application) GetWebsocketHandlerFunc(
 	getWebSocketResponseHeader func(conn *Connection, w http.ResponseWriter) (*http.Header, bool),
 	onUpgradingToWebSocketFailed func(err error, conn *Connection, w http.ResponseWriter),
 ) func(w http.ResponseWriter, r *http.Request) {
-	mHandler := func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		if !AbleToUpgrade(upgrader, w, r) {
 			onNotAbleToUpgradeToWebSocket(w, r)
 			return
 		}
-		connection := m.NewConnection(nil, r)
-		responseHeader, pass := getWebSocketResponseHeader(connection, w)
-		if !pass {
+		conn := m.NewConnection(nil, r)
+		responseHeader, accept := getWebSocketResponseHeader(conn, w)
+		if !accept {
 			return
 		}
-		conn, err := upgrader.Upgrade(w, r, *responseHeader)
+		connection, err := upgrader.Upgrade(w, r, *responseHeader)
 		if err != nil {
-			onUpgradingToWebSocketFailed(err, connection, w)
+			onUpgradingToWebSocketFailed(err, conn, w)
 			return
 		}
-		connection.WebSocketConn = conn
-		connection.OnConnect()
+		conn.WebSocketConn = connection
+		conn.OnConnect()
 	}
-	return mHandler
 }
 
 // The RootRouter is required and hence we don't provide function to set or modify root router.

@@ -8,10 +8,10 @@ import (
 )
 
 // Defined commands.
-const CmdPrefix = '$'
+const PrefixCmd = '$'
 const CmdPingString = "$PING"
 const CmdPongString = "$PONG"
-const JsonObjectPrefix = '{'
+const PrefixJsonObject = '{'
 
 var CmdPingBytes = []byte(CmdPingString)
 var CmdPongBytes = []byte(CmdPongString)
@@ -34,6 +34,7 @@ func (m *Connection) OnConnect() {
 	res := NewResponse(m, m.Locals, req)
 
 	if app.OnConnectionRouter != nil {
+		// CALLBACK for OnConnect.
 		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
 			fmt.Println("A device is connected:", request.URL.Path)
 		})
@@ -42,24 +43,28 @@ func (m *Connection) OnConnect() {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
 			if app.OnReadMessageFailed != nil {
+				// CALLBACK for read message failed.
 				app.OnReadMessageFailed(m, err)
 			}
 			break
 		}
 		if app.OnReceiveMessage != nil {
+			// CALLBACK for message.
 			app.OnReceiveMessage(m, mt, message)
 		}
-		if mt != websocket.TextMessage || len(message) == 0 || message[0] != JsonObjectPrefix {
+		if mt != websocket.TextMessage || len(message) == 0 || message[0] != PrefixJsonObject {
 			m.HandleMessage(mt, message)
 			continue
 		}
 		req, err := NewRequest(message, m)
 		if err != nil {
 			if app.OnReceiveInvalidRequest != nil {
+				// CALLBACK for invalid request.
 				app.OnReceiveInvalidRequest(m, mt, message)
 			}
 			if app.OnReceiveUnhandledMessage != nil {
-				m.Application.OnReceiveUnhandledMessage(m, mt, message)
+				// CALLBACK for unhandled message.
+				app.OnReceiveUnhandledMessage(m, mt, message)
 			}
 			continue
 		}
@@ -70,6 +75,7 @@ func (m *Connection) OnConnect() {
 		})
 	}
 	if app.OnDisconnectionRouter != nil {
+		// CALLBACK for onDisconnect.
 		app.OnDisconnectionRouter.Handle(request.URL.Path, req, res, func() {
 			fmt.Println("A device is connected:", request.URL.Path)
 		})
@@ -90,6 +96,7 @@ func (m *Connection) HandleMessage(messageType int, message []byte) {
 		}
 	}
 	if m.Application.OnReceiveUnhandledMessage != nil {
+		// CALLBACK for unhandled message.
 		m.Application.OnReceiveUnhandledMessage(m, messageType, message)
 	}
 }
