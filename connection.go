@@ -62,10 +62,6 @@ func (m *Connection) OnConnect() {
 				// CALLBACK for invalid request.
 				app.OnReceiveInvalidRequest(m, mt, message)
 			}
-			if app.OnReceiveUnhandledMessage != nil {
-				// CALLBACK for unhandled message.
-				app.OnReceiveUnhandledMessage(m, mt, message)
-			}
 			continue
 		}
 		if app.OnReceiveRequest != nil {
