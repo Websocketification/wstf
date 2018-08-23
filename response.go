@@ -1,6 +1,7 @@
 package wstf
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/gorilla/websocket"
@@ -51,7 +52,11 @@ func (m *Response) SetBody(body interface{}) *Response {
 
 // Finish the request.
 func (m *Response) End() error {
-	return m.Write(websocket.TextMessage, []byte(m.JsonResponse.ToJson()))
+	bytes, err := json.Marshal(m.JsonResponse)
+	if err != nil {
+		return err
+	}
+	return m.Write(websocket.TextMessage, bytes)
 }
 
 // Response to client.

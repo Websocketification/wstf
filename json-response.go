@@ -13,7 +13,3 @@ type JsonResponse struct {
 	// Response body.
 	Body interface{} `json:"body"`
 }
-
-func (m *JsonResponse) ToJson() string {
-	return Stringify(m)
-}
