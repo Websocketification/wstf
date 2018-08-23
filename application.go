@@ -50,7 +50,7 @@ func (m *Application) GetWebsocketHandlerFunc(
 	upgrader *websocket.Upgrader,
 	onNotAbleToUpgradeToWebSocket func(w http.ResponseWriter, r *http.Request),
 	getWebSocketResponseHeader func(conn *Connection, w http.ResponseWriter) (*http.Header, bool),
-	onUpgradingToWebSocketFailed func(err error, w http.ResponseWriter, r *http.Request),
+	onUpgradingToWebSocketFailed func(err error, conn *Connection, w http.ResponseWriter),
 ) func(w http.ResponseWriter, r *http.Request) {
 	mHandler := func(w http.ResponseWriter, r *http.Request) {
 		if !AbleToUpgrade(upgrader, w, r) {
@@ -64,7 +64,7 @@ func (m *Application) GetWebsocketHandlerFunc(
 		}
 		conn, err := upgrader.Upgrade(w, r, *responseHeader)
 		if err != nil {
-			onUpgradingToWebSocketFailed(err, w, r)
+			onUpgradingToWebSocketFailed(err, connection, w)
 			return
 		}
 		connection.WebSocketConn = conn
