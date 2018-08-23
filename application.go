@@ -24,6 +24,15 @@ type Application struct {
 	OnReceiveInvalidRequest func(conn *Connection, messageType int, message []byte)
 	// On received a valid request from client.
 	OnReceiveRequest func(req *Request, res *Response, message []byte)
+
+	// On the response is going to be encoded to JSON string.
+	OnEncodingResponse func(req *Request, res *Response)
+	// On failed to encode the JsonResponse.
+	OnFailedToEncodeResponse func(err error, req *Request, res *Response)
+	// On the response is going to be sent to client.
+	OnSendingResponse func(req *Request, res *Response, message []byte)
+	// On failed to send the response to client.
+	OnFailedToSendResponse func(err error, req *Request, res *Response, message []byte)
 }
 
 // Create a new Application with root router.

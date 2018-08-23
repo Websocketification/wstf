@@ -52,19 +52,42 @@ func (m *Response) SetBody(body interface{}) *Response {
 
 // Finish the request.
 func (m *Response) End() error {
+	app := m.Connection.Application
+	if app.OnEncodingResponse != nil {
+		// CALLBACK for all responses.
+		app.OnEncodingResponse(m.Request, m)
+	}
 	bytes, err := json.Marshal(m.JsonResponse)
 	if err != nil {
+		if app.OnFailedToEncodeResponse != nil {
+			app.OnFailedToEncodeResponse(err, m.Request, m)
+		} else {
+			fmt.Println("[WSTF] Failed to encode the JSON Response:", m.JsonResponse)
+		}
 		return err
 	}
 	return m.Write(websocket.TextMessage, bytes)
 }
 
-// Response to client.
+// Send the response to the client.
 func (m *Response) Write(mt int, message []byte) error {
+	// FIX-ME Support debugging mode( , which can be used for unit test).
 	if m.Connection == nil {
 		fmt.Println("DEBUGGING MODE: Sending Message: ", string(message))
 		return nil
 	}
+	app := m.Connection.Application
+	if app.OnSendingResponse != nil {
+		// CALLBACK for all responses.
+		app.OnSendingResponse(m.Request, m, message)
+	}
 	err := m.Connection.WebSocketConn.WriteMessage(mt, message)
+	if err != nil {
+		if app.OnFailedToSendResponse != nil {
+			app.OnFailedToSendResponse(err, m.Request, m, message)
+		} else {
+			fmt.Println("[WSTF] Failed to send the response to client:", err, message)
+		}
+	}
 	return err
 }
