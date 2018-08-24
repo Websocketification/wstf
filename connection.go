@@ -29,14 +29,15 @@ type Connection struct {
 func (m *Connection) OnConnect() {
 	app := m.Application
 	conn := m.WebSocketConn
-	request := m.HttpRequest
-	req := &Request{Connection: m, HttpRequest: m.HttpRequest}
-	res := NewResponse(m, m.Locals, req)
+	httpRequest := m.HttpRequest
+	// Fake request and response for connection handlers.
+	mConnectionRequest := &Request{Connection: m, HttpRequest: m.HttpRequest}
+	mConnectionResponse := NewResponse(m, m.Locals, mConnectionRequest)
 
 	if app.OnConnectionRouter != nil {
 		// CALLBACK for OnConnect.
-		app.OnConnectionRouter.Handle(request.URL.Path, req, res, func() {
-			fmt.Println("A device is connected:", request.URL.Path)
+		app.OnConnectionRouter.Handle(httpRequest.URL.Path, mConnectionRequest, mConnectionResponse, func() {
+			fmt.Println("A device is connected:", httpRequest.URL.Path)
 		})
 	}
 	for {
@@ -64,11 +65,11 @@ func (m *Connection) OnConnect() {
 			}
 			continue
 		}
+		res := NewResponse(m, m.Locals, req)
 		if app.OnReceiveRequest != nil {
 			// CALLBACK for request.
 			app.OnReceiveRequest(req, res, message)
 		}
-		res := NewResponse(m, m.Locals, req)
 		app.RootRouter.Handle(req.Path, req, res, func() {
 			fmt.Println("Unhandled request!")
 			res.Error(http.StatusNotFound, "Unhandled request!")
@@ -76,8 +77,8 @@ func (m *Connection) OnConnect() {
 	}
 	if app.OnDisconnectionRouter != nil {
 		// CALLBACK for onDisconnect.
-		app.OnDisconnectionRouter.Handle(request.URL.Path, req, res, func() {
-			fmt.Println("A device is connected:", request.URL.Path)
+		app.OnDisconnectionRouter.Handle(httpRequest.URL.Path, mConnectionRequest, mConnectionResponse, func() {
+			fmt.Println("A device is connected:", httpRequest.URL.Path)
 		})
 	}
 	conn.Close()
