@@ -4,8 +4,14 @@ import (
 	"net/http"
 )
 
-// General method that matches all method.
-const MethodAll = "ALL"
+const (
+	// General method that matches all method.
+	MethodAll = "ALL"
+
+	MethodLink = "LINK"
+
+	MethodUnlink = "UNLINK"
+)
 
 func (m *Route) All(processor Processor) *Route {
 	return m.ListenMethod(MethodAll, processor)
@@ -29,6 +35,22 @@ func (m *Route) Put(processor Processor) *Route {
 
 func (m *Route) Delete(processor Processor) *Route {
 	return m.ListenMethod(http.MethodDelete, processor)
+}
+
+func (m *Route) Head(processor Processor) *Route {
+	return m.ListenMethod(http.MethodHead, processor)
+}
+
+func (m *Route) Options(processor Processor) *Route {
+	return m.ListenMethod(http.MethodOptions, processor)
+}
+
+func (m *Route) Link(processor Processor) *Route {
+	return m.ListenMethod(MethodLink, processor)
+}
+
+func (m *Route) Unlink(processor Processor) *Route {
+	return m.ListenMethod(MethodUnlink, processor)
 }
 
 // Add processors to listen specific method.
