@@ -22,6 +22,7 @@ type Application struct {
 	OnReceiveUnhandledMessage func(conn *Connection, messageType int, message []byte)
 	// Call when received message starts with '{', but is not a valid request.
 	OnReceiveInvalidRequest func(conn *Connection, messageType int, message []byte)
+
 	// On received a valid request from client.
 	OnReceiveRequest func(req *Request, res *Response, message []byte)
 
@@ -33,6 +34,15 @@ type Application struct {
 	OnSendingResponse func(req *Request, res *Response, message []byte)
 	// On failed to send the response to client.
 	OnFailedToSendResponse func(err error, req *Request, res *Response, message []byte)
+
+	// On a pusher message is going to be encoded to JSON string.
+	OnEncodingPushMessage func(pusher *Pusher, message *PushMessage)
+	// On failed to encode the pusher message.
+	OnFailedToEncodePushMessage func(err error, pusher *Pusher, message *PushMessage)
+	// On the message is going to be pushed to the client.
+	OnPushingMessage func(pusher *Pusher, message *PushMessage, bytes []byte)
+	// On failed to push the message to the client.
+	OnFailedToPushMessage func(err error, pusher *Pusher, message *PushMessage, bytes []byte)
 }
 
 // Create a new Application with root router.
