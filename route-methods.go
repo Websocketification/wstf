@@ -53,6 +53,10 @@ func (m *Route) Unlink(processor Processor) *Route {
 	return m.ListenMethod(MethodUnlink, processor)
 }
 
+func (m *Route) TheEnd() {
+	// Do Nothing to Explicitly End the Route.
+}
+
 // Add processors to listen specific method.
 func (m *Route) ListenMethod(method string, processor Processor) *Route {
 	if m.Processors[method] == nil {
